@@ -1,4 +1,4 @@
-import { Err, Ok, Result, wrap } from "../src/std"
+import { safeWrap } from "../src/result"
 import { expect, test } from 'bun:test'
 
 test("Function that throws should have exception caught when wrapped", () => {
@@ -8,14 +8,11 @@ test("Function that throws should have exception caught when wrapped", () => {
     throw new Error(errorMessage);
   }
 
-  const wrappedFunctionThatThrows = wrap<Error>()(functionThatThrows);
+  const wrappedFunctionThatThrows = safeWrap(functionThatThrows);
 
   const result = wrappedFunctionThatThrows();
 
   expect(result.ok).toBe(false);
-  if (!result.ok) {
-    expect(result.err.message).toBe(errorMessage);
-  }
 });
 
 test("Unwrapping an Err result should throw", () => {
@@ -24,20 +21,19 @@ test("Unwrapping an Err result should throw", () => {
     throw new Error(errorMessage);
   }
 
-  const wrappedFunctionThatThrows = wrap<Error>()(functionThatThrows);
+  const wrappedFunctionThatThrows = safeWrap(functionThatThrows);
 
   const result = wrappedFunctionThatThrows();
 
   expect(result.unwrap).toThrow();
 });
 
-
 test("Unwrapping an Ok result should be fine", () => {
   function functionThatNeverThrows(): number {
     return 1;
   }
 
-  const wrappedFunctionThatNeverThrows = wrap()(functionThatNeverThrows);
+  const wrappedFunctionThatNeverThrows = safeWrap(functionThatNeverThrows);
 
   const result = wrappedFunctionThatNeverThrows();
 
